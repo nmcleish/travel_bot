@@ -2,13 +2,11 @@ import json
 import sys
 import time
 from datetime import datetime
-import threading
 import requests
 
-from foursquare import Foursquare
 from watson_developer_cloud import ConversationV1
 
-class HealthBot():
+class TravelBot():
 
     def __init__(self, user_store, dialog_store, conversation_username, conversation_password, conversation_workspace_id, weather_id, weather_password):
         """
@@ -20,8 +18,8 @@ class HealthBot():
         conversation_username - The Watson Conversation username
         conversation_password - The Watson Converation password
         conversation_workspace_id - The Watson Conversation workspace ID
-        foursquare_client_id - The Foursquare Client ID
-        foursquare_client_secret - The Foursquare Client Secret
+        weather_id - the Watson Weather ID
+        weather_password - the Watson Weather Password
         """
         self.user_store = user_store
         self.dialog_store = dialog_store
@@ -176,46 +174,6 @@ class HealthBot():
         except:
             return "What city in " + conversation_response['context']['location'] + " are you visiting?"
 
-
-        # def handle_find_doctor_by_location_message(self, conversation_response):
-    #     """
-    #     The handler for the findDoctorByLocation action defined in the Watson Conversation dialog.
-    #     Queries Foursquare for doctors based on the speciality identified by Watson Conversation
-    #     and the location entered by the user.
-    #     Parameters
-    #     ----------
-    #     conversation_response - The response from Watson Conversation
-    #     """
-    #     if self.foursquare_client is None:
-    #         return 'Please configure Foursquare.'
-    #     # Get the specialty from the context to be used in the query to Foursquare
-    #     query = ''
-    #     if 'specialty' in conversation_response['context'].keys() and conversation_response['context']['specialty'] is not None:
-    #         query = query + conversation_response['context']['specialty'] + ' '
-    #     query = query + 'Doctor'
-    #     # Get the location entered by the user to be used in the query
-    #     location = ''
-    #     if 'entities' in conversation_response.keys():
-    #         for entity in conversation_response['entities']:
-    #             if (entity['entity'] == 'sys-location'):
-    #                 if len(location) > 0:
-    #                     location = location + ' '
-    #             location = location + entity['value']
-    #     params = {
-    #         'query': query,
-    #         'near': location,
-    #         'radius': 5000
-    #     }
-    #     venues = self.foursquare_client.venues.search(params=params)
-    #     if venues is None or 'venues' not in venues.keys() or len(venues['venues']) == 0:
-    #         reply = 'Sorry, I couldn\'t find any doctors near you.'
-    #     else:
-    #         reply = 'Here is what I found:\n';
-    #         for venue in venues['venues']:
-    #             if len(reply) > 0:
-    #                 reply = reply + '\n'
-    #             reply = reply + '* ' + venue['name']
-    #     return reply
 
     def get_or_create_user(self, message_sender):
         """
