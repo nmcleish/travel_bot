@@ -16,7 +16,7 @@ Directions:
 8. Run python app.py
 9. Go to http://localhost:8080
 
-*To clear your context, tell the bot no.
+*To clear your context, tell the bot "no".
 
 
 
