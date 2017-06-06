@@ -122,8 +122,15 @@ class TravelBot():
         return reply
 
     def handle_find_weather_forecast(self, conversation_response):
+        """
+        Handles a weather request.
+        Returns a reply based on the date and location provided by the user input.
+        Parameters
+        __________
+        conversation_response - The response from Watson Conversation
+        """
 
-        #Calculate date
+        #Calculate days in between the given and today's date
         date_format = "%Y-%m-%d"
         today = datetime.now().strftime(date_format)
         given_date = conversation_response['context']['date']
@@ -132,12 +139,14 @@ class TravelBot():
         delta = b - a
         days = delta.days
 
-        #Check if date is valid
+        #Check if date is valid. Weather forecast is for 10 days and cannot predict past.
         if days < 0 :
-            reply = "I see you already went. Hope you had a great trip!"
+            reply = "I see you already went. Hope you had a great trip!\n\n"
+            reply = reply + "Would you like to enter another location?"
             return reply
         elif days > 9 :
-            reply = "Unfortunately, I cannot provide weather forecasts more than 9 days ahead. Sorry for any inconvenience."
+            reply = "Unfortunately, I cannot provide weather forecasts more than 9 days ahead. Sorry for any inconvenience.\n\n"
+            reply = reply + "Would you like to enter another location?"
             return reply
 
         #Url for location services
@@ -147,32 +156,34 @@ class TravelBot():
             #Search the location
             location = requests.get(watson_location_url, auth=(self.weather_id, self.weather_password))
 
-            #Convert text to json
+            #Convert location to json
             location = json.loads(location.text)
 
-            #Get latitude and longitude
+            #Get latitude and longitude and address
             latitude = str(location['location']['latitude'][0])
             longitude = str(location['location']['longitude'][0])
+            address = location['location']['address'][0]
 
-            #URL for 10 day weather forecast
+            #URL for 10 day weather forecast. Convert the forecast to json.
             watson_weather_url = 'https://{}:{}@twcservice.mybluemix.net:443/api/weather/v1/geocode/{}/{}/forecast/daily/10day.json'.format(self.weather_id, self.weather_password, latitude, longitude)
             weather = requests.get(watson_weather_url, auth=(self.weather_id, self.weather_password))
             weather = json.loads(weather.text)
             
-            #Get date and forecast
+            #Get day and forecast
             day_of_week = weather["forecasts"][days]["day"]["daypart_name"]
             forecast = weather["forecasts"][days]["narrative"]
+
+            #Lowercase for words today and tomorrow
             if (days <= 1) :
                 day_of_week = day_of_week.lower()
 
             #Set reply
-            reply = "Let me gather the weather forecast in " + location['location']['address'][0] + " for you.\n\n"
-            reply = reply + "The forecast for " + day_of_week + " says :\n" + forecast
-            #print weather["forecasts"][0]
-            # print(d['forecasts'][0]['narrative'])
+            reply = "Let me gather the weather forecast in {} for you.\n\n".format(address)
+            reply = reply + "The forecast for {} says :\n{}\n\n".format(day_of_week, forecast)
+            reply = reply + "Would you like to enter another location?"
             return reply
         except:
-            return "What city in " + conversation_response['context']['location'] + " are you visiting?"
+            return "Sorry, I couldn't find the weather forecast for {}\n\nWould you like to enter another location?".format(conversation_response['context']['location'])
 
 
     def get_or_create_user(self, message_sender):

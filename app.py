@@ -6,7 +6,7 @@ from flask import Flask, render_template, send_from_directory
 from flask_sockets import Sockets
 from gevent import pywsgi
 from geventwebsocket.handler import WebSocketHandler
-from travel_bot import HealthBot
+from travel_bot import TravelBot
 from slack_bot_controller import SlackBotController
 from web_socket_bot_controller import WebSocketBotController
 import os
@@ -59,7 +59,7 @@ if __name__ == '__main__':
             os.environ.get('CLOUDANT_URL'),
             os.environ.get('CLOUDANT_DIALOG_DB_NAME')
         )
-        healthBot = HealthBot(
+        travelBot = TravelBot(
             user_store,
             dialog_store,
             os.environ.get('CONVERSATION_USERNAME'),
@@ -68,15 +68,15 @@ if __name__ == '__main__':
             os.environ.get('WEATHER_ID'),
             os.environ.get('WEATHER_PASSWORD')
         )
-        healthBot.init()
+        travelBot.init()
         # Start Slackbot Controller
         slackBotController = SlackBotController(
-            healthBot,
+            travelBot,
             os.environ.get('SLACK_BOT_TOKEN')
         )
         slackBotController.start()
         # State WebSocket Controller
-        web_socket_bot_controller = WebSocketBotController(healthBot)
+        web_socket_bot_controller = WebSocketBotController(travelBot)
         web_socket_bot_controller.start()
         # Start HTTP/WebSocket server
         server = pywsgi.WSGIServer(('', port), app, handler_class=WebSocketHandler)
